@@ -5,10 +5,11 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, ArrowRight, BarChart3, Lock, Zap } from "lucide-react";
+import { Check, ArrowRight, BarChart3, Lock, Zap, X } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -16,27 +17,32 @@ export default function LandingPage() {
       {/* --- NAVBAR --- */}
       <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center font-bold text-xl tracking-tighter">
+          <Link
+            href="/"
+            className="group flex items-center font-bold text-xl tracking-tighter cursor-pointer"
+          >
             <Image
               src="/favicon.ico"
               alt="FinanceStart Logo"
               width={64}
               height={64}
-              className="rounded-lg"
+              className="rounded-lg transition-transform duration-200 group-hover:scale-[1.03]"
             />
-            <span>FinanceStart</span>
-          </div>
+            <span className="transition-colors duration-200 group-hover:text-slate-950">
+              FinanceStart
+            </span>
+          </Link>
           <nav className="flex items-center gap-4">
             <Link
               href="/login"
-              className="text-sm font-medium hover:underline underline-offset-4"
+              className="text-sm font-medium text-slate-600 hover:text-slate-900 hover:underline underline-offset-4 transition-colors cursor-pointer"
             >
               Login
             </Link>
             <Link href="/register">
               <Button
                 size="sm"
-                className="bg-black text-white hover:bg-zinc-800"
+                className="bg-black text-white hover:bg-zinc-800 transition-all hover:-translate-y-0.5 hover:shadow-md"
               >
                 Empezar Gratis
               </Button>
@@ -60,21 +66,40 @@ export default function LandingPage() {
             <Link href="/register">
               <Button
                 size="lg"
-                className="h-12 px-8 text-lg bg-black hover:bg-zinc-800"
+                className="h-12 px-8 text-lg bg-black hover:bg-zinc-800 transition-all hover:-translate-y-0.5 hover:shadow-lg"
               >
                 Crear cuenta gratis <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <Link href="#pricing">
-              <Button variant="outline" size="lg" className="h-12 px-8 text-lg">
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-12 px-8 text-lg transition-all hover:-translate-y-0.5 hover:shadow-md"
+              >
                 Ver Planes
               </Button>
             </Link>
           </div>
-          {/* Aquí iría una imagen del dashboard en el futuro */}
-          <div className="mt-16 rounded-xl border bg-gray-50 p-4 shadow-2xl">
-            <div className="aspect-[16/9] rounded-lg bg-white border flex items-center justify-center text-gray-400">
-              [Imagen del Dashboard Próximamente]
+          <div className="mt-16 rounded-2xl border bg-gray-50 p-6 shadow-2xl transition-shadow hover:shadow-[0_30px_60px_-30px_rgba(15,23,42,0.35)]">
+            <div className="rounded-xl bg-white shadow-inner overflow-hidden">
+              {/* Barra superior tipo app */}
+              <div className="flex items-center gap-2 px-4 py-3 border-b bg-gray-50">
+                <div className="w-3 h-3 bg-red-400 rounded-full" />
+                <div className="w-3 h-3 bg-yellow-400 rounded-full" />
+                <div className="w-3 h-3 bg-green-400 rounded-full" />
+                <span className="ml-4 text-sm text-gray-500">
+                  Resumen mensual
+                </span>
+              </div>
+
+              {/* Contenido simulado */}
+              <div className="p-6 grid grid-cols-3 gap-4">
+                <div className="h-20 rounded-lg bg-gray-100" />
+                <div className="h-20 rounded-lg bg-gray-100" />
+                <div className="h-20 rounded-lg bg-gray-100" />
+                <div className="col-span-3 h-40 rounded-lg bg-gray-100" />
+              </div>
             </div>
           </div>
         </section>
@@ -86,7 +111,7 @@ export default function LandingPage() {
               Todo lo que necesitás
             </h2>
             <div className="grid gap-8 md:grid-cols-3">
-              <Card>
+              <Card className="transition-all hover:-translate-y-1 hover:shadow-lg">
                 <CardHeader>
                   <BarChart3 className="h-10 w-10 text-orange-600 mb-2" />
                   <CardTitle>Análisis en Tiempo Real</CardTitle>
@@ -96,7 +121,7 @@ export default function LandingPage() {
                   mes.
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="transition-all hover:-translate-y-1 hover:shadow-lg">
                 <CardHeader>
                   <Zap className="h-10 w-10 text-yellow-500 mb-2" />
                   <CardTitle>Súper Rápido</CardTitle>
@@ -105,7 +130,7 @@ export default function LandingPage() {
                   Interfaz optimizada. Cargar un gasto toma menos de 3 segundos.
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="transition-all hover:-translate-y-1 hover:shadow-lg">
                 <CardHeader>
                   <Lock className="h-10 w-10 text-green-600 mb-2" />
                   <CardTitle>Seguridad Bancaria</CardTitle>
@@ -120,20 +145,21 @@ export default function LandingPage() {
 
         {/* --- PRICING --- */}
         <section id="pricing" className="container mx-auto px-4 py-24">
-          <h2 className="text-3xl font-bold tracking-tight text-center mb-4">
-            Planes
+          <h2 className="text-4xl font-bold tracking-tight text-center mb-4">
+            Planes Simples
           </h2>
-          <p className="text-center text-gray-500 mb-12">
-            Empezá gratis, pagá cuando crezcas.
+          <p className="text-center text-gray-500 mb-16 max-w-2xl mx-auto">
+            Elegí el plan que mejor se adapte a tu etapa financiera. Sin
+            contratos, cancelás cuando quieras.
           </p>
 
-          <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
+          <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
             {/* PLAN FREE */}
-            <Card className="flex flex-col">
+            <Card className="flex flex-col border-slate-200 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
               <CardHeader>
-                <CardTitle>Free</CardTitle>
+                <CardTitle className="text-xl">Starter</CardTitle>
                 <CardDescription>Para empezar a ordenarte</CardDescription>
-                <div className="text-3xl font-bold mt-4">
+                <div className="text-4xl font-bold mt-4">
                   $0{" "}
                   <span className="text-sm font-normal text-gray-500">
                     /mes
@@ -141,101 +167,143 @@ export default function LandingPage() {
                 </div>
               </CardHeader>
               <CardContent className="flex-1">
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-3 text-sm">
                   <li className="flex items-center">
-                    <Check className="mr-2 h-4 w-4 text-green-500" /> Registro
-                    de gastos ilimitado
+                    <Check className="mr-2 h-4 w-4 text-orange-600" />
+                    <span className="font-semibold">15 movimientos</span> / mes
                   </li>
                   <li className="flex items-center">
-                    <Check className="mr-2 h-4 w-4 text-green-500" /> Gráficos
-                    básicos
+                    <Check className="mr-2 h-4 w-4 text-orange-600" />
+                    Historial de 30 días
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-orange-600" />1
+                    Presupuesto básico
                   </li>
                   <li className="flex items-center text-gray-400">
-                    Sin conversión a USD
+                    <X className="mr-2 h-4 w-4" /> 1 Gráfico básico
+                  </li>
+                  <li className="flex items-center text-gray-400">
+                    <X className="mr-2 h-4 w-4" /> Sin conversión de moneda
+                  </li>
+                  <li className="flex items-center text-gray-400">
+                    <X className="mr-2 h-4 w-4" /> Sin exportación a Excel
                   </li>
                 </ul>
               </CardContent>
-              <div className="p-6 pt-0">
-                <Link href="/register">
-                  <Button variant="outline" className="w-full">
+              <CardFooter>
+                <Link href="/register" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full h-11 border-orange-200 text-orange-700 hover:bg-orange-50 hover:text-orange-800"
+                  >
                     Elegir Gratis
                   </Button>
                 </Link>
-              </div>
+              </CardFooter>
             </Card>
 
             {/* PLAN BASIC */}
-            <Card className="flex flex-col border-orange-600 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-orange-600 text-white text-xs px-3 py-1 rounded-bl-lg">
-                POPULAR
+            <Card className="flex flex-col border-orange-500 shadow-xl relative overflow-hidden scale-105 z-10 transition-all hover:-translate-y-1 hover:shadow-2xl">
+              <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wide">
+                Más Popular
               </div>
               <CardHeader>
-                <CardTitle>Basic</CardTitle>
+                <CardTitle className="text-xl text-orange-600">Basic</CardTitle>
                 <CardDescription>Potenciá tus ahorros</CardDescription>
-                <div className="text-3xl font-bold mt-4">
-                  $5000{" "}
+                <div className="text-4xl font-bold mt-4">
+                  $5.000{" "}
                   <span className="text-sm font-normal text-gray-500">
                     /mes
                   </span>
                 </div>
               </CardHeader>
               <CardContent className="flex-1">
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-3 text-sm">
                   <li className="flex items-center">
-                    <Check className="mr-2 h-4 w-4 text-orange-600" /> Todo lo
-                    del plan Free
+                    <Check className="mr-2 h-4 w-4 text-orange-600" />
+                    <span className="font-semibold">50 movimientos</span> / mes
                   </li>
                   <li className="flex items-center">
-                    <Check className="mr-2 h-4 w-4 text-orange-600" />{" "}
-                    Multimoneda (ARS/USD)
+                    <Check className="mr-2 h-4 w-4 text-orange-600" />
+                    Historial de 6 meses
                   </li>
                   <li className="flex items-center">
-                    <Check className="mr-2 h-4 w-4 text-orange-600" />{" "}
-                    Exportación a Excel
+                    <Check className="mr-2 h-4 w-4 text-orange-600" />3
+                    Presupuestos activos
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-orange-600" />3 Gráficos
+                    disponibles
+                  </li>
+                  <li className="flex items-center text-gray-400">
+                    <X className="mr-2 h-4 w-4" /> Sin conversión de moneda
                   </li>
                 </ul>
               </CardContent>
-              <div className="p-6 pt-0">
-                <Link href="/register">
-                  <Button className="w-full bg-orange-600 hover:bg-orange-700">
-                    Prueba de 7 días
+              <CardFooter>
+                <Link href="/register" className="w-full">
+                  <Button className="w-full h-11 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-lg shadow-orange-500/30 border-0">
+                    Empezar Prueba de 7 días
                   </Button>
                 </Link>
-              </div>
+              </CardFooter>
             </Card>
+
             {/* PLAN PREMIUM */}
-            <Card className="flex flex-col bg-gray-900 text-white">
+            <Card className="flex flex-col bg-slate-900 text-white border-slate-800 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
               <CardHeader>
-                <CardTitle className="text-white">Premium</CardTitle>
+                <CardTitle className="text-xl text-white">Premium</CardTitle>
                 <CardDescription className="text-gray-400">
-                  Para power users
+                  Libertad total
                 </CardDescription>
-                <div className="text-3xl font-bold mt-4 text-white">
-                  $9000{" "}
+                <div className="text-4xl font-bold mt-4 text-white">
+                  $9.000{" "}
                   <span className="text-sm font-normal text-gray-400">
                     /mes
                   </span>
                 </div>
               </CardHeader>
               <CardContent className="flex-1">
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-3 text-sm">
                   <li className="flex items-center">
-                    <Check className="mr-2 h-4 w-4 text-white" /> Soporte
-                    prioritario
+                    <Check className="mr-2 h-4 w-4 text-emerald-400" />
+                    <span className="font-semibold text-emerald-400">
+                      Movimientos Ilimitados
+                    </span>
                   </li>
                   <li className="flex items-center">
-                    <Check className="mr-2 h-4 w-4 text-white" /> IA Advisor
-                    (Próximamente)
+                    <Check className="mr-2 h-4 w-4 text-white" />
+                    Historial completo (Siempre)
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-white" />
+                    Presupuestos Ilimitados
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-white" />
+                    Todos los gráficos
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-white" />
+                    Multimoneda (ARS / USD)
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-white" />
+                    Exportación a Excel
                   </li>
                 </ul>
               </CardContent>
-              <div className="p-6 pt-0">
-                <Link href="/register">
-                  <Button variant="secondary" className="w-full">
-                    Contactar
+              <CardFooter>
+                <Link href="/register" className="w-full">
+                  <Button
+                    variant="secondary"
+                    className="w-full h-11 bg-white text-slate-900 hover:bg-gray-100"
+                  >
+                    Obtener Premium
                   </Button>
                 </Link>
-              </div>
+              </CardFooter>
             </Card>
           </div>
         </section>

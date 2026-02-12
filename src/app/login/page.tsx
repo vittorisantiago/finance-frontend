@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
 interface ErrorResponse {
   error: string;
@@ -26,6 +26,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +43,7 @@ export default function LoginPage() {
       });
 
       console.log("Login exitoso:", response.data);
-      // Si todo sale bien, redirigir al Dashboard (que haremos luego)
+      // Si todo sale bien, redirigir al Dashboard
       router.push("/dashboard");
     } catch (err: unknown) {
       const error = err as AxiosError;
@@ -64,7 +65,13 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-1">
+        <CardHeader className="space-y-2">
+          <Link
+            href="/"
+            className="text-sm text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+          >
+            ← Volver al inicio
+          </Link>
           <CardTitle className="text-2xl font-bold text-center">
             Bienvenido de nuevo
           </CardTitle>
@@ -104,13 +111,30 @@ export default function LoginPage() {
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </Button>
+              </div>
             </div>
 
             <Button
