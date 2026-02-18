@@ -1,6 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
+import { AxiosError } from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ArrowUpRight,
@@ -144,8 +146,9 @@ interface Transaction {
   notes?: string;
   date: string;
   amount: number;
+  categoryId?: string;
   category?: {
-    id: number;
+    id: string;
     name: string;
     icon?: string;
     color?: string;
@@ -166,7 +169,7 @@ interface DashboardData {
 }
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   fullName?: string;
   role: string;
@@ -174,30 +177,40 @@ interface User {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [chartDays, setChartDays] = useState(30);
 
   // Función para recargar datos
-  const fetchData = async (days = 30) => {
-    try {
-      const [dashboardRes, userRes] = await Promise.all([
-        api.get("/dashboard/summary", { params: { days } }),
-        api.get("/auth/me"),
-      ]);
-      setData(dashboardRes.data);
-      setUser(userRes.data.user);
-    } catch (error) {
-      console.error("Error cargando dashboard", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchData = useCallback(
+    async (days = 30) => {
+      try {
+        const [dashboardRes, userRes] = await Promise.all([
+          api.get("/dashboard/summary", { params: { days } }),
+          api.get("/auth/me"),
+        ]);
+        setData(dashboardRes.data);
+        setUser(userRes.data.user);
+      } catch (error) {
+        const err = error as AxiosError;
+        const status = err.response?.status;
+        if (status === 401 || status === 403) {
+          router.replace("/login");
+          return;
+        }
+        console.error("Error cargando dashboard", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [router],
+  );
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   if (loading) return <div className="p-8">Cargando tus finanzas...</div>;
 
@@ -269,9 +282,9 @@ export default function DashboardPage() {
       </div>
 
       {/* --- GRÁFICOS Y LISTA --- */}
-      <div className="grid gap-8 md:grid-cols-7">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
         {/* Gráfico Mejorado */}
-        <Card className="col-span-4 border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+        <Card className="border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-slate-700">
               Flujo de caja
@@ -368,14 +381,20 @@ export default function DashboardPage() {
         </Card>
 
         {/* Lista Recientes Mejorada */}
-        <Card className="col-span-3 border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+        <Card className="border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-slate-700">
               Recientes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 pr-2 max-h-[320px] overflow-y-auto custom-scrollbar">
+            <div className="space-y-2 pr-2 max-h-[320px] overflow-y-auto custom-scrollbar">
+              <div className="hidden sm:grid grid-cols-[1.6fr_1.2fr_1fr_minmax(120px,0.9fr)] gap-3 text-xs font-semibold uppercase tracking-wide text-slate-400 px-2">
+                <span>Categoria</span>
+                <span>Notas</span>
+                <span>Fecha</span>
+                <span className="text-right">Monto</span>
+              </div>
               {data?.recentTransactions?.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-40 text-slate-400">
                   <p className="text-sm">Sin movimientos</p>
@@ -390,18 +409,18 @@ export default function DashboardPage() {
                   .map((t: Transaction) => (
                     <div
                       key={t.id}
-                      className="flex items-center justify-between group cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition-colors"
+                      className="grid gap-3 rounded-lg p-2 transition-colors hover:bg-slate-50 sm:grid-cols-[1.6fr_1.2fr_1fr_minmax(120px,0.9fr)] sm:items-center"
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
                         {(() => {
                           const { Icon, colors } = getIconComponent(
                             t.category?.icon,
                           );
                           return (
                             <div
-                              className={`h-10 w-10 rounded-full flex items-center justify-center transition-all group-hover:scale-110 shadow-sm ${colors.bg}`}
+                              className={`h-9 w-9 rounded-full flex items-center justify-center transition-all shadow-sm ${colors.bg}`}
                             >
-                              <Icon className={`h-5 w-5 ${colors.text}`} />
+                              <Icon className={`h-4 w-4 ${colors.text}`} />
                             </div>
                           );
                         })()}
@@ -409,12 +428,7 @@ export default function DashboardPage() {
                           <p className="text-sm font-semibold text-slate-700 leading-none">
                             {t.category?.name || "Sin categoría"}
                           </p>
-                          {t.notes && (
-                            <p className="text-xs text-slate-500 mt-0.5">
-                              {t.notes}
-                            </p>
-                          )}
-                          <p className="text-xs text-slate-400 mt-1">
+                          <p className="text-xs text-slate-400 sm:hidden">
                             {new Date(t.date).toLocaleString("es-AR", {
                               day: "2-digit",
                               month: "2-digit",
@@ -425,8 +439,23 @@ export default function DashboardPage() {
                           </p>
                         </div>
                       </div>
+
+                      <div className="text-xs text-slate-500">
+                        {t.notes || "-"}
+                      </div>
+
+                      <div className="hidden text-xs text-slate-400 sm:block">
+                        {new Date(t.date).toLocaleString("es-AR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+
                       <div
-                        className={`font-bold text-sm ${t.type === "expense" ? "text-red-600" : "text-emerald-600"}`}
+                        className={`text-sm font-bold text-right tabular-nums whitespace-nowrap ${t.type === "expense" ? "text-red-600" : "text-emerald-600"}`}
                       >
                         {t.type === "expense" ? "-" : "+"} $
                         {Number(t.amount).toLocaleString()}
