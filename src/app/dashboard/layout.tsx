@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import api from "@/lib/axios";
+import { AxiosError } from "axios";
 
 const sidebarItems = [
   { icon: Home, label: "Resumen", href: "/dashboard" },
@@ -32,7 +33,7 @@ const sidebarItems = [
     label: "Transacciones",
     href: "/dashboard/transactions",
   },
-  { icon: LineChart, label: "Análisis", href: "/dashboard/analytics" },
+  { icon: LineChart, label: "Reportes", href: "/dashboard/analytics" },
   { icon: PiggyBank, label: "Presupuestos", href: "/dashboard/budgets" },
   { icon: Settings2, label: "Configuración", href: "/dashboard/settings" },
 ];
@@ -47,6 +48,112 @@ export default function DashboardLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const [userPlan, setUserPlan] = useState<string | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+
+  const normalizedPlan = useMemo(() => {
+    const raw = (userPlan || "free").toLowerCase();
+    if (raw === "basic" || raw === "premium" || raw === "free") return raw;
+    return "free";
+  }, [userPlan]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadMe = async () => {
+      try {
+        const res = await api.get("/auth/me");
+        const plan = res.data?.user?.plan as string | undefined;
+        if (isMounted) setUserPlan(plan ?? "free");
+      } catch (error) {
+        const err = error as AxiosError;
+        const status = err.response?.status;
+        if (status === 401 || status === 403) {
+          router.replace("/login");
+          return;
+        }
+        console.error("Error cargando usuario", error);
+      } finally {
+        if (isMounted) setIsLoadingUser(false);
+      }
+    };
+
+    loadMe();
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
+
+  const PlanCard = () => {
+    if (isLoadingUser) {
+      return (
+        <div className="rounded-xl bg-slate-900 p-4 text-white">
+          <div className="mb-2 text-xs font-medium text-slate-400">
+            Plan Actual
+          </div>
+          <div className="h-4 w-32 rounded bg-slate-800" />
+          <div className="mt-4 h-9 w-full rounded bg-slate-800" />
+        </div>
+      );
+    }
+
+    const isPremium = normalizedPlan === "premium";
+    const isBasic = normalizedPlan === "basic";
+
+    const planLabel =
+      normalizedPlan === "premium"
+        ? "Premium"
+        : normalizedPlan === "basic"
+          ? "Basic"
+          : "Free";
+
+    return (
+      <div className="rounded-xl bg-slate-900 p-4 text-white">
+        <div className="mb-2 text-xs font-medium text-slate-400">
+          Plan Actual
+        </div>
+
+        <div className="mb-3 flex items-center gap-2">
+          <div className="text-sm font-bold">{planLabel}</div>
+
+          {isPremium ? (
+            <span className="inline-flex items-center rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-200 ring-1 ring-inset ring-emerald-500/30">
+              Máximo nivel
+            </span>
+          ) : isBasic ? (
+            <span className="inline-flex items-center rounded-full bg-orange-500/20 px-2 py-0.5 text-[10px] font-semibold text-orange-200 ring-1 ring-inset ring-orange-500/30">
+              Más pro
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-200 ring-1 ring-inset ring-slate-700">
+              Starter
+            </span>
+          )}
+        </div>
+
+        {isPremium ? (
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex items-center rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-semibold text-violet-200 ring-1 ring-inset ring-violet-500/30">
+              Insignia premium
+            </span>
+            <span className="inline-flex items-center rounded-full bg-sky-500/20 px-2 py-0.5 text-[10px] font-semibold text-sky-200 ring-1 ring-inset ring-sky-500/30">
+              Acceso completo
+            </span>
+          </div>
+        ) : (
+          <Link href="/subscribe" className="block">
+            <Button
+              size="sm"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white border-0"
+            >
+              Pasar a Premium
+            </Button>
+          </Link>
+        )}
+      </div>
+    );
+  };
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -98,19 +205,7 @@ export default function DashboardLayout({
           </nav>
 
           <div className="px-4 space-y-4">
-            {/* Tarjeta de Plan Actual */}
-            <div className="rounded-xl bg-slate-900 p-4 text-white">
-              <div className="mb-2 text-xs font-medium text-slate-400">
-                Plan Actual
-              </div>
-              <div className="mb-4 text-sm font-bold">Free Plan</div>
-              <Button
-                size="sm"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white border-0"
-              >
-                Pasar a Premium
-              </Button>
-            </div>
+            <PlanCard />
 
             <Button
               onClick={() => setShowLogoutDialog(true)}
@@ -218,18 +313,7 @@ export default function DashboardLayout({
               </nav>
 
               <div className="px-4 space-y-4">
-                <div className="rounded-xl bg-slate-900 p-4 text-white">
-                  <div className="mb-2 text-xs font-medium text-slate-400">
-                    Plan Actual
-                  </div>
-                  <div className="mb-4 text-sm font-bold">Free Plan</div>
-                  <Button
-                    size="sm"
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white border-0"
-                  >
-                    Pasar a Premium
-                  </Button>
-                </div>
+                <PlanCard />
 
                 <Button
                   onClick={() => {
